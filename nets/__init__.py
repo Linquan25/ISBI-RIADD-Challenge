@@ -8,3 +8,5 @@ from .densenet161 import Densenet161
 from .effNetB7 import effNetB7
 from .effNetB6 import effNetB6
 from .fineNet import FineNet
+from .global_resnext import Global_ResNext
+from .ensembleNet import ensembleNet
