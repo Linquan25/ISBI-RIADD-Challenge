@@ -20,7 +20,7 @@ model.eval()
 model.cuda()
 
 testing_img_path = '../Test_Set/Test/'
-testing_df = '../Test_Set/RFMiD_Testing_Labels.csv'
+testing_df = 'fineNet/test_rare.csv'
 valset = ISBI_rareset.ISBIRareset(testing_df, testing_img_path, testing=True)
 N = len(valset)
 batch_size = 32
@@ -28,7 +28,7 @@ dataloader = DataLoader(valset, batch_size=batch_size, shuffle=False,
                         num_workers=24)
 
 outs = np.zeros((N, 29))
-labels = np.zeros((N, 18))
+labels = np.zeros((N, 19))
 for i, (imgs, label) in enumerate(tqdm.tqdm(dataloader)):
 
     idx = i * batch_size
@@ -37,9 +37,9 @@ for i, (imgs, label) in enumerate(tqdm.tqdm(dataloader)):
     #out = np.round(out).astype('int').clip(1, None)
     outs[idx:idx + len(out),:] = out
     labels[idx:idx + len(label),:]  = label.detach().cpu().numpy()
-    
+sig = torch.nn.Sigmoid()  
 outs2 = outs[:,(8,  9, 10, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28)]
-sig = torch.nn.Sigmoid()
+
 # rounded_illness_pred = np.round(sig(torch.tensor(outs[:,0])).numpy()).astype('int')
 # illness_label = labels[:,0]
 
@@ -53,8 +53,13 @@ sig = torch.nn.Sigmoid()
 # bce = lossFunc(torch.tensor(outs), torch.tensor(labels))
 
 # print(f'BCE: {bce}')
-diseases_label = labels
+diseases_label = labels[:,1:]
 diseases_pred = sig(torch.tensor(outs2)).numpy()
+# for i in range(outs.shape[0]):
+#     if outs2[i].sum()+1 != outs[i].sum():
+#         outs2[i]= np.hstack((outs2[i],1))
+#     else:
+#         outs2[i] = np.hstack((outs2[i],0))
 auc2 = roc_auc_score(diseases_label, diseases_pred)
 print(f'AUC of Challenge 2: {auc2}')
 

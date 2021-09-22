@@ -121,9 +121,9 @@ class ISBIDataset(Dataset):
         #label[0] = 1-label[0]
         if self.reweight: 
             if self.testing:
-                return input_tensor, label, self.getWeight(label)
-            else:
                 return input_tensor, label, 1
+            else:
+                return input_tensor, label, self.getWeight(label)
         else:
             return input_tensor, label
     

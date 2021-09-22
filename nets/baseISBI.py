@@ -50,7 +50,7 @@ class BaseNet(pl.LightningModule):
         loss = criterion(y_pred.squeeze(), y_true)
         #loss = self.loss_func(y_pred.squeeze(), y_true)
         self.log('val_loss', loss)
-        wandb.log({"val_loss": loss})
+        #wandb.log({"val_loss": loss})
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=config.LR)

@@ -22,8 +22,8 @@ def main():
     #train_df, val_df = train_test_split(data_df, test_size=0.1) 
     training_img_path = '../Training_Set/Training/'
     evaluation_img_path = '../Evaluation_Set/Validation'
-    train_df = 'train_rare.csv'
-    val_df = '../Evaluation_Set/RFMiD_Validation_Labels.csv'
+    train_df = 'fineNet/train_rare.csv'
+    val_df = 'fineNet/valid_rare.csv'
     trainset = ISBI_rareset.ISBIRareset(train_df, training_img_path, testing=False, reweight=False)
     valset = ISBI_rareset.ISBIRareset(val_df, evaluation_img_path, testing=True, reweight=False)
 
@@ -34,7 +34,7 @@ def main():
     wandb_logger = WandbLogger(project='ISBI-BCE-FineNet')
     checkpoint_callback = ModelCheckpoint(monitor='val_loss', 
                                           dirpath='data/checkpoints',
-                                          filename='ISBI-BCE-FineNet-{epoch:03d}-{val_loss:.4f}',
+                                          filename='ISBI-BCE-FineNet_fromScratch-{epoch:03d}-{val_loss:.4f}',
                                           save_top_k=4,
                                           mode='min')
 

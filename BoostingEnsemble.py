@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import pandas as pd
+from torchvision import models
 from torchvision.models.densenet import densenet161
 import tqdm
 from torch.utils.data import DataLoader
@@ -10,15 +11,19 @@ import ISBI_rareset
 from metrics import *
 from nets import ResNet, ResNext, ViT, ResNet152, Densenet161, effNetB7, effNetB6
 
-# ckpt = torch.load('weights/resnext50_32x4d-epoch=027-val_arr=7.96.ckpt', map_location=torch.device('cpu'))
+def loadModel(ckpt_path):
+    model = ResNext()
+    ckpt = torch.load(ckpt_path, map_location=torch.device('cpu'))
+    new_dict = {k.replace('vit.', 'model.'): v for k, v in ckpt['state_dict'].items()}
+    model.load_state_dict(new_dict)
+    return model
 
-model = ResNext()
-ckpt = torch.load('saved_model/ISBI-WeightedBCE-ResNext101-epoch=013-val_loss=0.0892.ckpt', map_location=torch.device('cpu'))
-#ckpt = torch.load('data/checkpoints/ISBI-WeightedBCE-boosting-b1-ResNext101-epoch=006-val_loss=0.0882.ckpt', map_location=torch.device('cpu'))
-new_dict = {k.replace('vit.', 'model.'): v for k, v in ckpt['state_dict'].items()}
-model.load_state_dict(new_dict)
-model.eval()
-model.cuda()
+########## load models ###########
+model1 = loadModel('saved_model/ISBI-WeightedBCE-ResNext101-epoch=013-val_loss=0.0892.ckpt')
+model1.eval()
+model1.cuda()
+M = []
+M.append(model1)
 
 testing_img_path = '../Test_Set/Test/'
 testing_df = '../Test_Set/RFMiD_Testing_Labels.csv'
@@ -28,33 +33,21 @@ batch_size = 32
 dataloader = DataLoader(valset, batch_size=batch_size, shuffle=False, 
                         num_workers=24)
 
-outs = np.zeros((N, 29))
-labels = np.zeros((N, 29))
-for i, (imgs, label, w) in enumerate(tqdm.tqdm(dataloader)):
+outs = np.zeros((N, 29, len(M)))
+labels = np.zeros((N, 29, len(M)))
+for n in range(len(M)):
+    for i, (imgs, label, w) in enumerate(tqdm.tqdm(dataloader)):
 
-    idx = i * batch_size
-    imgs = imgs.cuda()
-    out = model(imgs).detach().cpu().numpy()
-    #out = np.round(out).astype('int').clip(1, None)
-    outs[idx:idx + len(out),:] = out
-    labels[idx:idx + len(label),:]  = label.detach().cpu().numpy()
+        idx = i * batch_size
+        imgs = imgs.cuda()
+        out = M[0](imgs).detach().cpu().numpy()
+        #out = np.round(out).astype('int').clip(1, None)
+        outs[idx:idx + len(out),:, n] = out
+        if n ==0:
+            labels[idx:idx + len(label),:]  = label.detach().cpu().numpy()
     
 sig = torch.nn.Sigmoid()
-
-def postPro(outs):
-    for i in range(outs.shape[0]):
-        if outs[i][0]<0.1:
-            outs[i,1:] = outs[i,1:] * outs[i][0]
-    return outs
-def postPro2(outs):
-    for i in range(outs.shape[0]):
-        if outs[i][0]<0.5:
-            for j in range(outs.shape[1]-1):
-                if outs[i][j+1] > 0.6:
-                    outs[i][0] = outs[i][0]/outs[i][j+1]
-    return outs
 outs = sig(torch.tensor(outs)).numpy()
-outs = postPro2(outs)
 rounded_illness_pred = np.round(outs[:,0]).astype('int')
 illness_label = labels[:,0]
 

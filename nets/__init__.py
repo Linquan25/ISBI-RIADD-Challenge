@@ -10,3 +10,4 @@ from .effNetB6 import effNetB6
 from .fineNet import FineNet
 from .global_resnext import Global_ResNext
 from .ensembleNet import ensembleNet
+from .SELayer import SELayer

@@ -62,37 +62,15 @@ EVALUATION_TRANSFORMS = transforms.Compose(
     ]
 )
 
-TRAIN_TRANSFORMS_EFF = transforms.Compose(
-    [
-        transforms.Resize((380,380)),
-        transforms.RandomHorizontalFlip(0.5),
-        transforms.RandomVerticalFlip(0.5),
-        #resize(250,250)->scale(0.8-1.2)->crop(224,224)
-        #contrast norm
-        #rotation, blur(smoothing), scale(0.8-1.2)
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),    
-    ]
-)
-
-EVALUATION_TRANSFORMS_EFF = transforms.Compose(
-    [
-        transforms.Resize((380,380)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),    
-    ]
-)
-
-class ISBIRareset(Dataset):
-    def __init__(self, csv_path, img_path, testing=False, reweight=False) -> None:
+class ISBIDataset(Dataset):
+    def __init__(self, csv_path, img_path, weight_csv, testing=False) -> None:
         super().__init__()
 
         self.df = pd.read_csv(csv_path, header=0)
         self.img_path = img_path
         self.preprocess = EVALUATION_TRANSFORMS if testing else TRAIN_TRANSFORMS
         self.testing = testing
-        self.reweight = reweight
-        self.weight = self.weightCalculation()
+        self.weight = pd.read_csv(weight_csv, header=0) if weight_csv else 1
     
     def __getitem__(self, index):
         img_id = self.df.iloc[index][0]
@@ -114,49 +92,25 @@ class ISBIRareset(Dataset):
             input_tensor = self.preprocess(input_image)
         
         label = self.df.iloc[index][1:].to_list()
-        label = torch.tensor(label).long()
+        label = torch.tensor(label)
         if len(label)>29:
             label = torch.cat((label[0:28],torch.tensor([1])),0) if label[28:].sum()>0 else torch.cat((label[0:28],torch.tensor([0])),0)
-        ### rare case 8,  9, 10, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28 ###
-        rare_label = label[np.array([8,  9, 10, 11, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28])]
-        if rare_label.sum() != label[1:].sum():
-            rare_label= np.hstack((1,rare_label))
+        if self.testing:
+            return input_tensor, label, 1
         else:
-            rare_label = np.hstack((0,rare_label))
-        if self.reweight: 
-            if self.testing:
-                return input_tensor, rare_label, 1
-            else:
-                return input_tensor, rare_label, self.getWeight(label)
-        else:
-            return input_tensor, rare_label
+            weight = self.getWeight(label)
+            return input_tensor, label, weight
     
     def __len__(self):
         return len(self.df)
-            
-    def weightCalculation(self):
-        data = self.df.values[:,1:]
-        c = np.zeros((data.shape[1],))
-        for i in data[:]:
-            for j in range(i.shape[0]):
-                if i[j]==1:
-                    c[j]+=1
-        c[0] = data.shape[0] - c[0]
-        w = np.zeros_like(c)
-        for i in range(w.shape[0]):
-            w[i] = np.sum(c)/c[i]
-        w = w/np.min(w)
-        return w
     
     def getWeight(self, label):
         weight = 0
-        count = 0
         for i, n in enumerate(label):
-            if n==1:
-                weight += self.weight[i]
-                count += 1
-        if count ==0:
-            return self.weight[0]
+            if n==1 and i!=0:
+                weight += self.weight.iloc[i][0]
+        if weight ==0:
+            return self.weight.iloc[0][0]
         else:
-            return weight/count
+            return weight
         
