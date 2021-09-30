@@ -16,8 +16,8 @@ class effNetB6(BaseNet):
         #     "pytorch/vision:v0.9.0", "resnext50_32x4d", pretrained=pretrained
         # )
         #self.model = models.resnext50_32x4d(pretrained=True)
-        self.model = EfficientNet.from_pretrained('efficientnet-b4')
-        self.model._fc = nn.Linear(1792, 29)
+        self.model = EfficientNet.from_pretrained('efficientnet-b6')
+        self.model._fc = nn.Linear(2304, 29) #B4->1792 B6->2304
         #self.loss_func = nn.BCEWithLogitsLoss()
         self.loss_func = weighted_BCEWithLogitsLoss
         #self.loss_func = ISBI_Challenge_Loss

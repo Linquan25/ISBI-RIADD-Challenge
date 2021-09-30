@@ -13,8 +13,8 @@ from nets import ResNet, ResNext, ViT, ResNet152, Densenet161, effNetB7, effNetB
 # ckpt = torch.load('weights/resnext50_32x4d-epoch=027-val_arr=7.96.ckpt', map_location=torch.device('cpu'))
 
 model = ResNext()
-ckpt = torch.load('saved_model/ISBI-WeightedBCE-ResNext101-epoch=013-val_loss=0.0892.ckpt', map_location=torch.device('cpu'))
-#ckpt = torch.load('data/checkpoints/ISBI-WeightedBCE-boosting-b1-ResNext101-epoch=006-val_loss=0.0882.ckpt', map_location=torch.device('cpu'))
+#ckpt = torch.load('saved_model/ISBI-WeightedBCE-ResNext101-epoch=013-val_loss=0.0892.ckpt', map_location=torch.device('cpu'))
+ckpt = torch.load('data/checkpoints/ISBI-732-ResNext101-epoch=021-val_loss=0.0805.ckpt', map_location=torch.device('cpu'))
 new_dict = {k.replace('vit.', 'model.'): v for k, v in ckpt['state_dict'].items()}
 model.load_state_dict(new_dict)
 model.eval()
@@ -24,7 +24,7 @@ testing_img_path = '../Test_Set/Test/'
 testing_df = '../Test_Set/RFMiD_Testing_Labels.csv'
 valset = ISBI_data.ISBIDataset(testing_df, testing_img_path, testing=True)
 N = len(valset)
-batch_size = 32
+batch_size = 8
 dataloader = DataLoader(valset, batch_size=batch_size, shuffle=False, 
                         num_workers=24)
 

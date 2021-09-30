@@ -17,8 +17,8 @@ from nets import ResNext
 plt.style.use('ggplot')
 
 def main():
-    boosting_number = 5
-    for n in range(boosting_number):
+    boosting_number = 10
+    for n in range(5,boosting_number):
         model = ResNext()
 
         #data_df = pd.read_csv(config.CSV_PATH)

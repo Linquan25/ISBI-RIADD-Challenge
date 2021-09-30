@@ -41,11 +41,11 @@ def contrast_strech(img):
 
 TRAIN_TRANSFORMS = transforms.Compose(
     [
-        transforms.Resize((224,224)),
+        transforms.Resize((244,244)),
         #transforms.Resize((250,250)),
         transforms.RandomHorizontalFlip(0.5),
         transforms.RandomVerticalFlip(0.5),
-        transforms.RandomRotation(degrees=(0,45)),
+        transforms.RandomRotation(degrees=(0,15)),
         #transforms.RandomResizedCrop(size=(224,224),scale=(0.8,1.2), ratio=(0.999,1.001)),
         #transforms.Resize((224,224)),
         transforms.ToTensor(),
@@ -56,7 +56,7 @@ TRAIN_TRANSFORMS = transforms.Compose(
 
 EVALUATION_TRANSFORMS = transforms.Compose(
     [
-        transforms.Resize((224,224)),
+        transforms.Resize((244,244)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),    
     ]
@@ -64,7 +64,7 @@ EVALUATION_TRANSFORMS = transforms.Compose(
 
 TRAIN_TRANSFORMS_EFF = transforms.Compose(
     [
-        transforms.Resize((380,380)),
+        transforms.Resize((528,528)),  #B0->224 B1->240 B2->260 B3->300 B4->380 B5->456 B6->528 B7->600
         transforms.RandomHorizontalFlip(0.5),
         transforms.RandomVerticalFlip(0.5),
         #resize(250,250)->scale(0.8-1.2)->crop(224,224)
@@ -77,7 +77,7 @@ TRAIN_TRANSFORMS_EFF = transforms.Compose(
 
 EVALUATION_TRANSFORMS_EFF = transforms.Compose(
     [
-        transforms.Resize((380,380)),
+        transforms.Resize((528,528)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),    
     ]
@@ -102,7 +102,7 @@ class ISBIDataset(Dataset):
         if input_image.shape[1] == 4288:
             input_image = transforms.ToPILImage()(input_image)
             input_image = transforms.functional.affine(input_image, angle=.0, scale=1,shear=0,translate = [175,0])
-            input_image = transforms.CenterCrop((2848, 3423))(input_image)
+            input_image = transforms.CenterCrop((2848, 3423))(input_image) #(3423)
             input_tensor = self.preprocess(input_image)
         elif input_image.shape[1] == 2144:
             input_image = transforms.ToPILImage()(input_image)

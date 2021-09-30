@@ -13,7 +13,7 @@ from nets import ResNet, ResNext, ViT, ResNet152, Densenet161, effNetB7, effNetB
 
 model = ResNext()
 #ckpt = torch.load('saved_model/ISBI-WeightedBCE-ResNext101-epoch=013-val_loss=0.0892.ckpt', map_location=torch.device('cpu'))
-ckpt = torch.load('data/checkpoints/ISBI-WeightedBCE-boosting-b1-ResNext101-epoch=005-val_loss=0.0823.ckpt', map_location=torch.device('cpu'))
+ckpt = torch.load('data/checkpoints/ISBI-WeightedBCE-boosting-b1-ResNext101-b4-epoch=010-val_loss=0.0832.ckpt', map_location=torch.device('cpu'))
 new_dict = {k.replace('vit.', 'model.'): v for k, v in ckpt['state_dict'].items()}
 model.load_state_dict(new_dict)
 model.eval()
@@ -73,7 +73,7 @@ for i in range(labels_valid.shape[0]):
             weight[j]+=1
 weight[weight==0]=1
 weight_df = pd.DataFrame(weight)
-weight_df.to_csv('boosting/weight_b3.csv', index=False)
+#weight_df.to_csv('boosting/weight_b3.csv', index=False)
 print(weight)
 # ########## Test Set ############
 # for i, (imgs, label, w) in enumerate(tqdm.tqdm(dataloader_test)):

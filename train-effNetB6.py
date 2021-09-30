@@ -5,7 +5,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
-import ISBI_data
+import EffNet_dataset
 import config
 import data
 import wandb
@@ -24,18 +24,18 @@ def main():
     evaluation_img_path = '../Evaluation_Set/Validation'
     train_df = '../Training_Set/RFMiD_Training_Labels.csv'
     val_df = '../Evaluation_Set/RFMiD_Validation_Labels.csv'
-    trainset = ISBI_data.ISBIDataset(train_df, training_img_path, testing=False)
-    valset = ISBI_data.ISBIDataset(val_df, evaluation_img_path, testing=True)
+    trainset = EffNet_dataset.ISBIDataset(train_df, training_img_path, testing=False)
+    valset = EffNet_dataset.ISBIDataset(val_df, evaluation_img_path, testing=True)
 
-    trainloader = DataLoader(trainset, batch_size=64, shuffle=True, num_workers=20)
-    valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=20)
+    trainloader = DataLoader(trainset, batch_size=8, shuffle=True, num_workers=20)
+    valloader = DataLoader(valset, batch_size=8, shuffle=False, num_workers=20)
 
-    wandb.init(project='ISBI-WeightedBCE-effNetB7')
-    wandb_logger = WandbLogger(project='ISBI-WeightedBCE-effNetB7')
+    wandb.init(project='ISBI-WeightedBCE-effNetB6-input768', settings=wandb.Settings(start_method='thread'))
+    wandb_logger = WandbLogger(project='ISBI-WeightedBCE-effNetB6-input768')
     checkpoint_callback = ModelCheckpoint(monitor='val_loss', 
                                           dirpath='data/checkpoints',
-                                          filename='ISBI-WeightedBCE-effNetB4-{epoch:03d}-{val_loss:.4f}',
-                                          save_top_k=5,
+                                          filename='ISBI-WeightedBCE-effNetB6-input768-{epoch:03d}-{val_loss:.4f}',
+                                          save_top_k=4,
                                           mode='min')
 
     trainer = pl.Trainer(gpus=config.DEVICES, 

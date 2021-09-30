@@ -45,7 +45,7 @@ TRAIN_TRANSFORMS = transforms.Compose(
         #transforms.Resize((250,250)),
         transforms.RandomHorizontalFlip(0.5),
         transforms.RandomVerticalFlip(0.5),
-        transforms.RandomRotation(degrees=(0,45)),
+        transforms.RandomRotation(degrees=(0,15)),
         #transforms.RandomResizedCrop(size=(224,224),scale=(0.8,1.2), ratio=(0.999,1.001)),
         #transforms.Resize((224,224)),
         transforms.ToTensor(),
