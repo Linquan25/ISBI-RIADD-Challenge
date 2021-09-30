@@ -11,3 +11,4 @@
 *.yaml
 *.sh
 *.ckpt
+*.joblib
