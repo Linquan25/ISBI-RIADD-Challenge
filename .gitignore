@@ -13,3 +13,5 @@
 *.ckpt
 *.joblib
 **.npy
+*.npy
+**/npy
