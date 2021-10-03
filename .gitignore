@@ -12,4 +12,4 @@
 *.sh
 *.ckpt
 *.joblib
-*.npy
+**.npy
