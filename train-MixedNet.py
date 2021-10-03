@@ -15,10 +15,10 @@ import wandb
 from nets import ResNext
 
 plt.style.use('ggplot')
-
+#### start from 244x244 resnext 101 -> 488x488 ->732x732 -> 976x976
 def main():
-    boosting_number = 5
-    for n in range(0,boosting_number):
+    boosting_number = 4
+    for n in range(3,boosting_number):
         model = ResNext()
 
         #data_df = pd.read_csv(config.CSV_PATH)
@@ -27,20 +27,21 @@ def main():
         evaluation_img_path = '../Evaluation_Set/Validation'
         train_df = '../Training_Set/RFMiD_Training_Labels.csv'
         val_df = '../Evaluation_Set/RFMiD_Validation_Labels.csv'
-        weight_path = f'boosting/weight_b{n}.csv'
-        trainset = boosting_data.ISBIDataset(train_df, training_img_path, weight_path, testing=False, input_size=732)
-        valset = boosting_data.ISBIDataset(val_df, evaluation_img_path, weight_csv = None, testing=True, input_size=732)
-
-        trainloader = DataLoader(trainset, batch_size=16, shuffle=True, num_workers=20)
-        valloader = DataLoader(valset, batch_size=16, shuffle=False, num_workers=20)
+        weight_id = n-1
+        weight_path = f'boosting/weight_b{weight_id}.csv'
+        trainset = boosting_data.ISBIDataset(train_df, training_img_path, weight_path, testing=False, input_size=((n+1)*244))
+        valset = boosting_data.ISBIDataset(val_df, evaluation_img_path, weight_csv = None, testing=True, input_size=((n+1)*244))
+        bs = 10
+        trainloader = DataLoader(trainset, batch_size=bs, shuffle=True, num_workers=20)
+        valloader = DataLoader(valset, batch_size=bs, shuffle=False, num_workers=20)
 
         wandb.init(project='boosting-ResNext')
         wandb_logger = WandbLogger(project='boosting-ResNext')
         checkpoint_callback = ModelCheckpoint(monitor='val_loss', 
                                             #save_last = True,
-                                            dirpath='boosting/checkpoints_ResNext101_732/checkpoints',
+                                            dirpath='data/checkpoints',
                                             #every_n_val_epochs = 10,
-                                            filename=f'ISBI-WeightedBCE-boosting-ResNext101_732x732-b{n}'+'-{epoch:03d}-{val_loss:.4f}',
+                                            filename=f'pyramid-boosting-ResNext101-b{n}'+'-{epoch:03d}-{val_loss:.4f}',
                                             save_top_k=3,
                                             mode='min')
 
@@ -48,13 +49,13 @@ def main():
                             #  num_nodes=2,
                             logger=wandb_logger, 
                             log_every_n_steps=config.LOG_STEP,
-                            callbacks=[checkpoint_callback], max_epochs=15)
+                            callbacks=[checkpoint_callback], max_epochs=25)
         trainer.fit(model, trainloader, val_dataloaders=valloader)
 
         print("Finished Training")
         
         N = len(valset)
-        batch_size = 16
+        batch_size = bs
         outs_valid = np.zeros((N, 29))
         labels_valid = np.zeros((N, 29))
         for i, (imgs, label, w) in enumerate(tqdm.tqdm(valloader)):
@@ -79,8 +80,7 @@ def main():
         weight = weight/count
         #weight = weight/min(weight)
         weight_df = pd.DataFrame(weight)
-        next_id = n+1
-        weight_df.to_csv(f'boosting/checkpoints_ResNext101_732/weight_b{next_id}.csv', index=False)
+        weight_df.to_csv(f'boosting/weight_b{n}.csv', index=False)
         #print(weight)
         #print(count)
 if __name__ == "__main__":

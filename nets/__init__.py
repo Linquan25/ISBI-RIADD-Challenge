@@ -11,3 +11,5 @@ from .fineNet import FineNet
 from .global_resnext import Global_ResNext
 from .ensembleNet import ensembleNet
 from .SELayer import SELayer
+from .SEResNeXt50 import SE_ResNeXt
+from .FreezeNet import FreezeNet

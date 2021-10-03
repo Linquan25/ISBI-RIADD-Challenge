@@ -11,14 +11,14 @@ import ISBI_data
 import config
 import data
 import wandb
-from nets import ResNext
+from nets import SE_ResNeXt
 
 plt.style.use('ggplot')
 
 def main():
     
 
-    model = ResNext()
+    model = SE_ResNeXt()
     #model = torch.nn.DataParallel(model)
     #data_df = pd.read_csv(config.CSV_PATH)
     #train_df, val_df = train_test_split(data_df, test_size=0.1) 
@@ -29,14 +29,14 @@ def main():
     trainset = ISBI_data.ISBIDataset(train_df, training_img_path, testing=False)
     valset = ISBI_data.ISBIDataset(val_df, evaluation_img_path, testing=True)
 
-    trainloader = DataLoader(trainset, batch_size=8, shuffle=True, num_workers=20)
-    valloader = DataLoader(valset, batch_size=8, shuffle=False, num_workers=20)
+    trainloader = DataLoader(trainset, batch_size=32, shuffle=True, num_workers=20)
+    valloader = DataLoader(valset, batch_size=32, shuffle=False, num_workers=20)
 
-    wandb.init(project='ISBI-WeightedBCE-ResNext')
-    wandb_logger = WandbLogger(project='ISBI-WeightedBCE-ResNext')
+    wandb.init(project='ISBI-WeightedBCE-SEResNext50')
+    wandb_logger = WandbLogger(project='ISBI-WeightedBCE-SEResNext50')
     checkpoint_callback = ModelCheckpoint(monitor='val_loss', 
                                           dirpath='data/checkpoints',
-                                          filename='ISBI-732-ResNext101-{epoch:03d}-{val_loss:.4f}',
+                                          filename='ISBI-488-SEResNext50-{epoch:03d}-{val_loss:.4f}',
                                           save_top_k=4,
                                           mode='min')
     logger = TensorBoardLogger(save_dir='log/', version=1, name="lightning_logs")

@@ -5,14 +5,16 @@ from torchvision.models.densenet import densenet161
 import tqdm
 from torch.utils.data import DataLoader
 from sklearn.metrics import roc_auc_score, average_precision_score
-import EffNet_dataset
+import ISBI_data
+import ISBI_rareset
 from metrics import *
-from nets import effNetB6
+from nets import SE_ResNeXt
 
+# ckpt = torch.load('weights/resnext50_32x4d-epoch=027-val_arr=7.96.ckpt', map_location=torch.device('cpu'))
 
-model = effNetB6()
-#ckpt = torch.load('saved_model/ISBI-WeightedBCE-effNetB6-epoch=019-val_loss=0.0876.ckpt', map_location=torch.device('cpu'))
-ckpt = torch.load('data/checkpoints/ISBI-WeightedBCE-effNetB6-input768-epoch=010-val_loss=0.0823.ckpt', map_location=torch.device('cpu'))
+model = SE_ResNeXt()
+#ckpt = torch.load('saved_model/ISBI-WeightedBCE-ResNext101-epoch=013-val_loss=0.0892.ckpt', map_location=torch.device('cpu'))
+ckpt = torch.load('data/checkpoints/ISBI-488-SEResNext50-epoch=016-val_loss=0.0871.ckpt', map_location=torch.device('cpu'))
 new_dict = {k.replace('vit.', 'model.'): v for k, v in ckpt['state_dict'].items()}
 model.load_state_dict(new_dict)
 model.eval()
@@ -20,9 +22,9 @@ model.cuda()
 
 testing_img_path = '../Test_Set/Test/'
 testing_df = '../Test_Set/RFMiD_Testing_Labels.csv'
-valset = EffNet_dataset.ISBIDataset(testing_df, testing_img_path, testing=True)
+valset = ISBI_data.ISBIDataset(testing_df, testing_img_path, testing=True)
 N = len(valset)
-batch_size = 4
+batch_size = 8
 dataloader = DataLoader(valset, batch_size=batch_size, shuffle=False, 
                         num_workers=24)
 

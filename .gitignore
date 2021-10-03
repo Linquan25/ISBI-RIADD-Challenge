@@ -1,7 +1,7 @@
 *.png
 *.csv
 *.sav
-*.ipynb
+#*.ipynb
 *.pyc
 *.wandb
 *.log

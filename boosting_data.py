@@ -39,33 +39,31 @@ def contrast_strech(img):
     imgnew=np.asarray(imgnew,dtype=np.uint8)
     return imgnew
 
-TRAIN_TRANSFORMS = transforms.Compose(
-    [
-        transforms.Resize((224,224)),
-        #transforms.Resize((250,250)),
-        transforms.RandomHorizontalFlip(0.5),
-        transforms.RandomVerticalFlip(0.5),
-        transforms.RandomRotation(degrees=(0,15)),
-        #transforms.RandomResizedCrop(size=(224,224),scale=(0.8,1.2), ratio=(0.999,1.001)),
-        #transforms.Resize((224,224)),
-        transforms.ToTensor(),
-        #transforms.ColorJitter(brightness=0.2, contrast=0.1, saturation=0.1, hue=0.1), 
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),    
-    ]
-)
-
-EVALUATION_TRANSFORMS = transforms.Compose(
-    [
-        transforms.Resize((224,224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),    
-    ]
-)
-
 class ISBIDataset(Dataset):
-    def __init__(self, csv_path, img_path, weight_csv, testing=False) -> None:
+    def __init__(self, csv_path, img_path, weight_csv, testing=False, input_size=244 ) -> None:
         super().__init__()
+        TRAIN_TRANSFORMS = transforms.Compose(
+            [
+                transforms.Resize((input_size,input_size)),
+                #transforms.Resize((250,250)),
+                transforms.RandomHorizontalFlip(0.5),
+                transforms.RandomVerticalFlip(0.5),
+                transforms.RandomRotation(degrees=(0,15)),
+                #transforms.RandomResizedCrop(size=(224,224),scale=(0.8,1.2), ratio=(0.999,1.001)),
+                #transforms.Resize((224,224)),
+                transforms.ToTensor(),
+                #transforms.ColorJitter(brightness=0.2, contrast=0.1, saturation=0.1, hue=0.1), 
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),    
+            ]
+        )
 
+        EVALUATION_TRANSFORMS = transforms.Compose(
+            [
+                transforms.Resize((input_size,input_size)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),    
+            ]
+        )
         self.df = pd.read_csv(csv_path, header=0)
         self.img_path = img_path
         self.preprocess = EVALUATION_TRANSFORMS if testing else TRAIN_TRANSFORMS

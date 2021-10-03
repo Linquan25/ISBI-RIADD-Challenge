@@ -41,7 +41,7 @@ def contrast_strech(img):
 
 TRAIN_TRANSFORMS = transforms.Compose(
     [
-        transforms.Resize((244,244)),
+        transforms.Resize((732,732)),
         #transforms.Resize((250,250)),
         transforms.RandomHorizontalFlip(0.5),
         transforms.RandomVerticalFlip(0.5),
@@ -56,7 +56,7 @@ TRAIN_TRANSFORMS = transforms.Compose(
 
 EVALUATION_TRANSFORMS = transforms.Compose(
     [
-        transforms.Resize((244,244)),
+        transforms.Resize((732,732)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),    
     ]
