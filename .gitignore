@@ -1,0 +1,15 @@
+*.png
+*.csv
+*.sav
+#*.ipynb
+*.pyc
+*.wandb
+*.log
+*.json
+*.txt
+*.log
+*.yaml
+*.sh
+*.ckpt
+*.joblib
+*.npy
